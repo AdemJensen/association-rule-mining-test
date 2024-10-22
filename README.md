@@ -9,3 +9,7 @@ However, to get a better grasp of how different factors affect the performance o
 
 If you want to use the provided datasets, you can find them in the `datasets` folder. There is another readme.md file located under it.
 
+## Special Thanks
+
+Thanks to [tyc98](https://github.com/tcy98) for his implementation of brute-force: https://github.com/tcy98/Apriori-Algorithm
+
