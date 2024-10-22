@@ -55,10 +55,30 @@ def eval_params(dataset, n_run_time=10, mode='support', min_val=0, max_val=1, ot
 
 def evaluate(datasets, n_run_time=10, mode='transactions', do_estimation=True, do_log=False):
     # Sort datasets by n_transactions
+    plot_x = []
+    name_x = ""
+    name_short_x = ""
+    control = ""
     if mode == 'transactions':
         datasets.sort(key=lambda x: len(x.transactions))
-    else:
+        plot_x = [len(dataset.transactions) for dataset in datasets]
+        name_x = "Number of Transactions"
+        name_short_x = "TX"
+        control = f" n_UI = {len(datasets[0].unique_items)}"
+    elif mode == 'unique_items':
         datasets.sort(key=lambda x: len(x.unique_items))
+        plot_x = [len(dataset.unique_items) for dataset in datasets]
+        name_x = "Number of Unique Items"
+        name_short_x = "UI"
+        control = f" n_TX = {len(datasets[0].transactions)}"
+    elif mode == 'avg_item_density':
+        datasets.sort(key=lambda x: x.avg_item_density())
+        plot_x = [dataset.avg_item_density() for dataset in datasets]
+        name_x = "Average Item Density"
+        name_short_x = "Avg_IDensity"
+        control = ""
+    else:
+        raise ValueError("Invalid mode")
 
     # Create progress bar for running Orange on datasets
     run_progress = IntProgress(min=0, max=len(datasets), description='', bar_style='')
@@ -98,16 +118,12 @@ def evaluate(datasets, n_run_time=10, mode='transactions', do_estimation=True, d
         run_label.value = f"Running Orange: {percentage_outer}% ({i + 1}/{len(datasets)})"
 
     # Plotting the run times for both algorithms
-    transaction_counts = [len(dataset.transactions) for dataset in datasets]
-    uniq_items_counts = [len(dataset.unique_items) for dataset in datasets]
     plt.figure(figsize=(4, 3))  # This makes the figure 1/4 of the default size (8x6)
-    plt.plot(transaction_counts if mode == "transactions" else uniq_items_counts, run_times, label='Orange')
+    plt.plot(plot_x, run_times, label='Orange')
     if do_estimation:
-        plt.plot(transaction_counts if mode == "transactions" else uniq_items_counts, est_times, label='Brute-Force')
+        plt.plot(plot_x, est_times, label='Brute-Force')
     plt.legend()
-    plt.xlabel(f'Number of {"Transactions" if mode == "transactions" else "Unique Items"}')
+    plt.xlabel(name_x)
     plt.ylabel('Average Run Time (seconds)')
-    plt.title(f'Run Time across {"TX" if mode == "transactions" else "UI"} '
-              f'({"n_UI" if mode == "transactions" else "n_TX"} = '
-              f'{len(datasets[0].unique_items) if mode == "transactions" else len(datasets[0].transactions)})')
+    plt.title(f'Run Time across {name_short_x}{control}')
     plt.show()

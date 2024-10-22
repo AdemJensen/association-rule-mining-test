@@ -19,7 +19,7 @@ def generate_item_names(n):
         items.append(name)
     return items
 
-def gen(n_uniq_items, n_transactions, longest_transaction_len, scale=2.0):
+def gen(n_uniq_items, n_transactions, longest_transaction_len, scale=2.0, shortest_transaction_len=1):
     """
     Generate dummy transactions where the distribution of transaction lengths follows an exponential distribution.
 
@@ -39,15 +39,18 @@ def gen(n_uniq_items, n_transactions, longest_transaction_len, scale=2.0):
     transactions = []
 
     for _ in range(n_transactions):
-        # Use the exponential distribution to determine the transaction length
-        transaction_len = int(np.random.exponential(scale=scale))
+        if longest_transaction_len < 0:
+            transaction = random.sample(items, n_uniq_items)
+        else:
+            # Use the exponential distribution to determine the transaction length
+            transaction_len = int(np.random.exponential(scale=scale))
 
-        # Ensure the transaction length stays within [1, longest_transaction_len]
-        transaction_len = max(1, transaction_len)  # At least 1 item in every transaction
-        transaction_len = min(transaction_len, longest_transaction_len)
+            # Ensure the transaction length stays within [1, longest_transaction_len]
+            transaction_len = max(shortest_transaction_len, transaction_len)  # At least 1 item in every transaction
+            transaction_len = min(transaction_len, longest_transaction_len)
 
-        # Randomly select items for this transaction
-        transaction = random.sample(items, transaction_len)
+            # Randomly select items for this transaction
+            transaction = random.sample(items, transaction_len if longest_transaction_len != -1 else n_uniq_items)
         transactions.append(transaction)
 
     return Dataset("Dummy", transactions)

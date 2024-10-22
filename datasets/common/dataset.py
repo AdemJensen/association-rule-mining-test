@@ -22,6 +22,13 @@ class Dataset:
             json.dump(data, f)
         print(f"Dataset saved to {filename}")
 
+    def avg_item_density(self):
+        total_uniq_items = 0
+        for tx in self.transactions:
+            tx_set = set(tx)
+            total_uniq_items += len(tx_set)
+        return total_uniq_items / (len(self.transactions) * len(self.unique_items))
+
     # Load a dataset from a file (class method)
     @classmethod
     def load(cls, filename):
